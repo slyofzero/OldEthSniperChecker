@@ -62,11 +62,11 @@ export async function processTransaction(tx: TransactionExtended) {
       const tokenTransaction = transactions[tokenAddress];
 
       if (tokenTransaction) {
-        tokenTransaction.buys += buy;
+        tokenTransaction.buys.push(buy);
       } else {
         transactions[tokenAddress] = {
           startTime: Math.floor(Date.now() / 1000),
-          buys: buy,
+          buys: [buy],
         };
       }
 

@@ -9,7 +9,7 @@ import { CHANNEL_ID } from "@/utils/env";
 import { errorHandler, log } from "@/utils/handlers";
 import { teleBot } from "..";
 
-export async function sendAlert(token: string) {
+export async function sendAlert(token: string, buysCount: number) {
   let message = "";
 
   try {
@@ -40,7 +40,7 @@ export async function sendAlert(token: string) {
       .map(({ is_contract, percent, address }) => {
         const holding = cleanUpBotMessage((Number(percent) * 100).toFixed(1)); // prettier-ignore
         const url = `https://etherscan.io/address/${address}`;
-        const text = `[${is_contract ? "📜" : "🧑‍💼"} ${holding}%](${url})`;
+        const text = `[${is_contract ? "📜" : "👨"} ${holding}%](${url})`;
         return text;
       })
       .slice(0, 5)
@@ -82,6 +82,7 @@ ${isVerified}
 ${isBuyTaxSafe} Buy Tax: ${cleanUpBotMessage(buyTax)}%
 ${isSellTaxSafe} Sell Tax: ${cleanUpBotMessage(sellTax)}%
 ${isLpLocked}
+🎯 Snipers: ${buysCount}
 
 Token Contract:
 \`${token}\`
@@ -96,6 +97,18 @@ Social Links: ${socialLinks}
 
     teleBot.api
       .sendMessage(CHANNEL_ID, message, {
+        parse_mode: "MarkdownV2",
+        // @ts-expect-error Param not found
+        disable_web_page_preview: true,
+      })
+      .then(() => log(`Sent message for ${token}`))
+      .catch((err) => {
+        log(message);
+        errorHandler(err);
+      });
+
+    teleBot.api
+      .sendMessage(-1002084945881, message, {
         parse_mode: "MarkdownV2",
         // @ts-expect-error Param not found
         disable_web_page_preview: true,

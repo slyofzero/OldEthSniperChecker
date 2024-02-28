@@ -10,9 +10,10 @@ export function cleanUpTransactions() {
   for (const token in transactions) {
     const storedToken = transactions[token];
     const secondsElapsed = currentTime - storedToken.startTime;
+    const totalBuys = storedToken.buys.reduce((prev, curr) => prev + curr);
 
-    if (storedToken.buys > VOLUME_THRESHOLD) {
-      sendAlert(token);
+    if (totalBuys > VOLUME_THRESHOLD) {
+      sendAlert(token, storedToken.buys.length);
     }
 
     if (secondsElapsed > ALERT_INTERVAL) {
