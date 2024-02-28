@@ -60,9 +60,9 @@ export async function sendAlert(token: string) {
     const displayCreatorAddress = `${creator_address.slice(0,3)}\\.\\.\\.${creator_address.slice(-3)}`; // prettier-ignore
     const displayOwnerAddress = `${owner_address.slice(0,3)}\\.\\.\\.${owner_address.slice(-3)}`; // prettier-ignore
     const hypeScore = getRandomInteger();
-    const snipers = firstPair.txns.m5.buys;
+    const snipers = firstPair.txns.m5.buys + 1;
 
-    message = `*Hype Alert*
+    message = `*Volume Alert*
 
 ${hardCleanUpBotMessage(name)} \\| ${hardCleanUpBotMessage(symbol)}
 
