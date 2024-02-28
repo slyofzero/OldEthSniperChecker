@@ -10,7 +10,7 @@ import { errorHandler, log } from "@/utils/handlers";
 import { teleBot } from "..";
 import { getRandomInteger } from "@/utils/general";
 
-export async function sendAlert(token: string, buysCount: number) {
+export async function sendAlert(token: string) {
   let message = "";
 
   try {
@@ -60,6 +60,7 @@ export async function sendAlert(token: string, buysCount: number) {
     const displayCreatorAddress = `${creator_address.slice(0,3)}\\.\\.\\.${creator_address.slice(-3)}`; // prettier-ignore
     const displayOwnerAddress = `${owner_address.slice(0,3)}\\.\\.\\.${owner_address.slice(-3)}`; // prettier-ignore
     const hypeScore = getRandomInteger();
+    const snipers = firstPair.txns.m5.buys;
 
     message = `*Hype Alert*
 
@@ -84,7 +85,7 @@ ${isVerified}
 ${isBuyTaxSafe} Buy Tax: ${cleanUpBotMessage(buyTax)}%
 ${isSellTaxSafe} Sell Tax: ${cleanUpBotMessage(sellTax)}%
 ${isLpLocked}
-🎯 Snipers: ${buysCount}
+🎯 Snipers: ${snipers} (in past 5 minutes)
 
 Token Contract:
 \`${token}\`

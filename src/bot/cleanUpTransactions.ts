@@ -13,7 +13,7 @@ export function cleanUpTransactions() {
     const totalBuys = storedToken.buys.reduce((prev, curr) => prev + curr);
 
     if (totalBuys > VOLUME_THRESHOLD) {
-      sendAlert(token, storedToken.buys.length).then(() => {
+      sendAlert(token).then(() => {
         delete transactions[token];
       });
     }
