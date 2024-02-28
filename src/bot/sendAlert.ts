@@ -85,7 +85,7 @@ ${isVerified}
 ${isBuyTaxSafe} Buy Tax: ${cleanUpBotMessage(buyTax)}%
 ${isSellTaxSafe} Sell Tax: ${cleanUpBotMessage(sellTax)}%
 ${isLpLocked}
-🎯 Snipers: ${snipers} (in past 5 minutes)
+🎯 Snipers: ${snipers}
 
 Token Contract:
 \`${token}\`
