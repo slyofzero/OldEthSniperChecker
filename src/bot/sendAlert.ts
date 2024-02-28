@@ -8,6 +8,7 @@ import { extractSocialLinks } from "../ethWeb3/extractSocialLinks";
 import { CHANNEL_ID } from "@/utils/env";
 import { errorHandler, log } from "@/utils/handlers";
 import { teleBot } from "..";
+import { getRandomInteger } from "@/utils/general";
 
 export async function sendAlert(token: string, buysCount: number) {
   let message = "";
@@ -58,12 +59,13 @@ export async function sendAlert(token: string, buysCount: number) {
     const socialLinks = await extractSocialLinks(token);
     const displayCreatorAddress = `${creator_address.slice(0,3)}\\.\\.\\.${creator_address.slice(-3)}`; // prettier-ignore
     const displayOwnerAddress = `${owner_address.slice(0,3)}\\.\\.\\.${owner_address.slice(-3)}`; // prettier-ignore
+    const hypeScore = getRandomInteger();
 
     message = `*Hype Alert*
 
 ${hardCleanUpBotMessage(name)} \\| ${hardCleanUpBotMessage(symbol)}
 
-Hype Score: 93/100
+Hype Score: ${hypeScore}/100
 
 Age: *${age}*
 Supply: *${totalSupply}*
