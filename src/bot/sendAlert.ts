@@ -100,7 +100,7 @@ Security: [OttoSimBot](${`https://t.me/OttoSimBot?start=${token}`}) \\| [TokenSn
 Social Links: ${socialLinks}
 
 [📊 DexTools](${`https://www.dextools.io/app/en/ether/pair-explorer/${token}`}) [📊 DexSpy](${`https://dexspy.io/eth/token/${token}`})
-[📊 DexTools](${`https://dexscreener.com/ethereum/${token}`}) [⚪ Etherscan](${`https://etherscan.io//token/${token}`})
+[📊 DexScreener](${`https://dexscreener.com/ethereum/${token}`}) [⚪ Etherscan](${`https://etherscan.io//token/${token}`})
   `;
 
     const testChannelMsg = teleBot.api.sendMessage(-1002084945881, message, {
