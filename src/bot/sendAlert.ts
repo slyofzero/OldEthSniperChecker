@@ -73,7 +73,7 @@ export async function sendAlert(token: string) {
         fdv <= 500000
       )
     ) {
-      log(`Liquidity not in range ${liquidity}`);
+      log(`Liquidity not in range ${liquidityUsd} ${fdv}`);
       return false;
     }
 
