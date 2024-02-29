@@ -30,7 +30,7 @@ export async function sendAlert(token: string) {
     const firstPair = tokenData.data.pairs.at(0);
     if (!firstPair) return false;
 
-    const { baseToken, pairCreatedAt } = firstPair;
+    const { baseToken, pairCreatedAt, fdv } = firstPair;
     const { name, symbol } = baseToken;
     const age = cleanUpBotMessage(moment(pairCreatedAt).fromNow());
     const totalSupply = cleanUpBotMessage(parseFloat(Number(tokenAudit.total_supply).toFixed(2)).toLocaleString("en")) // prettier-ignore
@@ -64,7 +64,14 @@ export async function sendAlert(token: string) {
     const snipers = firstPair.txns.m5.buys + 1;
     const liquidity = firstPair.liquidity.quote;
 
-    if (!(liquidity >= 3000 && liquidity <= 12000)) {
+    if (
+      !(
+        liquidity >= 3000 &&
+        liquidity <= 12000 &&
+        fdv >= 15000 &&
+        fdv <= 500000
+      )
+    ) {
       log(`Liquidity not in range ${liquidity}`);
       return false;
     }
