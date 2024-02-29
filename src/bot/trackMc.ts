@@ -42,7 +42,7 @@ export async function trackMC() {
         launchMessageTest,
         ...rest
       } = hypeNewPairs[token];
-      const currentMC = Number(marketCap) * 2;
+      const currentMC = Number(marketCap);
 
       if (initialMC === 0 && currentMC > 0) {
         log(`Token ${tokenAddress} got a non-zero price`);
