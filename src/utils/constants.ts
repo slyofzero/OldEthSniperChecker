@@ -5,6 +5,7 @@ export const MAESTRO_ROUTER_ADDRESS = "0x4b8c0a0df725750aeb948816b4dffecd32ee900
 export const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
 export const ALERT_INTERVAL = 30;
 export const VOLUME_THRESHOLD = 1e4;
+export const MC_TRACK_THRESHOLD = 24 * 60 * 60;
 export const TOKEN_ABI = [
   {
     constant: true,

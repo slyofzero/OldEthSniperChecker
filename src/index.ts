@@ -12,6 +12,7 @@ import { TransactionExtended } from "./types/web3";
 import { getEthPrice } from "./vars/ethPrice";
 import { cleanUpTransactions } from "./bot/cleanUpTransactions";
 import { ALERT_INTERVAL } from "./utils/constants";
+import { trackMC } from "./bot/trackMc";
 
 export const teleBot = new Bot(BOT_TOKEN || "");
 log("Bot instance ready");
@@ -71,4 +72,5 @@ log("Bot instance ready");
 
   setInterval(cleanUpTransactions, ALERT_INTERVAL * 1e3);
   setInterval(getEthPrice, 60 * 1e3);
+  setInterval(trackMC, 10 * 1e3);
 })();

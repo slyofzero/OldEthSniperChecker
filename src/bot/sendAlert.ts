@@ -9,6 +9,7 @@ import { CHANNEL_ID } from "@/utils/env";
 import { errorHandler, log } from "@/utils/handlers";
 import { teleBot } from "..";
 import { getRandomInteger } from "@/utils/general";
+import { hypeNewPairs } from "@/vars/pairs";
 
 export async function sendAlert(token: string) {
   let message = "";
@@ -98,29 +99,34 @@ Social Links: ${socialLinks}
 [📊 DexTools](${`https://dexscreener.com/ethereum/${token}`}) [⚪ Etherscan](${`https://etherscan.io//token/${token}`})
   `;
 
-    teleBot.api
-      .sendMessage(CHANNEL_ID, message, {
-        parse_mode: "MarkdownV2",
-        // @ts-expect-error Param not found
-        disable_web_page_preview: true,
-      })
-      .then(() => log(`Sent message for ${token}`))
-      .catch((err) => {
-        log(message);
-        errorHandler(err);
-      });
+    const testChannelMsg = teleBot.api.sendMessage(-1002084945881, message, {
+      parse_mode: "MarkdownV2",
+      // @ts-expect-error Param not found
+      disable_web_page_preview: true,
+    });
 
-    teleBot.api
-      .sendMessage(-1002084945881, message, {
-        parse_mode: "MarkdownV2",
-        // @ts-expect-error Param not found
-        disable_web_page_preview: true,
-      })
-      .then(() => log(`Sent message for ${token}`))
-      .catch((err) => {
-        log(message);
-        errorHandler(err);
-      });
+    const mainChannelMsg = teleBot.api.sendMessage(CHANNEL_ID, message, {
+      parse_mode: "MarkdownV2",
+      // @ts-expect-error Param not found
+      disable_web_page_preview: true,
+    });
+
+    const [testMsg, mainMsg] = await Promise.all([
+      testChannelMsg,
+      mainChannelMsg,
+    ]);
+
+    if (!hypeNewPairs[token]) {
+      log(`Start tracking ${token} MC`);
+
+      hypeNewPairs[token] = {
+        initialMC: firstPair.fdv,
+        startTime: Math.floor(Date.now() / 1000),
+        pastBenchmark: 1,
+        launchMessageTest: testMsg.message_id,
+        launchMessageMain: mainMsg.message_id,
+      };
+    }
   } catch (error) {
     log(message);
     errorHandler(error);
