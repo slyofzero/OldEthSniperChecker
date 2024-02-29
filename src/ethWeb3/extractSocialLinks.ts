@@ -50,7 +50,7 @@ export async function extractSocialLinks(contractAddress: string) {
             cleanLink.startsWith("https://") ||
             cleanLink.startsWith("http://")
           ) {
-            links.push(`[Website](${cleanLink})`);
+            links.push(`[Website](${cleanLink.replace(/[()]/g, "")})`);
           }
         }
       } else {

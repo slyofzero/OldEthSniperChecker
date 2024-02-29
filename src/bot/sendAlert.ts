@@ -1,7 +1,11 @@
 import { apiFetcher } from "@/utils/api";
 import { PairData } from "@/types";
 import { auditToken } from "../ethWeb3/auditToken";
-import { cleanUpBotMessage, hardCleanUpBotMessage } from "@/utils/bot";
+import {
+  cleanUpBotMessage,
+  generateKeyboard,
+  hardCleanUpBotMessage,
+} from "@/utils/bot";
 import moment from "moment";
 import { NULL_ADDRESS } from "@/utils/constants";
 import { extractSocialLinks } from "../ethWeb3/extractSocialLinks";
@@ -11,7 +15,7 @@ import { teleBot } from "..";
 import { getRandomInteger } from "@/utils/general";
 import { hypeNewPairs } from "@/vars/pairs";
 
-export async function sendAlert(token: string) {
+export async function sendAlert(token: string, buysCount: number) {
   let message = "";
 
   try {
@@ -61,9 +65,41 @@ export async function sendAlert(token: string) {
     const displayCreatorAddress = `${creator_address.slice(0,3)}\\.\\.\\.${creator_address.slice(-3)}`; // prettier-ignore
     const displayOwnerAddress = `${owner_address.slice(0,3)}\\.\\.\\.${owner_address.slice(-3)}`; // prettier-ignore
     const hypeScore = getRandomInteger();
-    const snipers = firstPair.txns.m5.buys + 1;
+    const snipers = firstPair.txns.m5.buys + buysCount;
     const liquidity = firstPair.liquidity.quote;
     const liquidityUsd = firstPair.liquidity.usd;
+
+    // Audit
+    let contractFunctions = "";
+    if (tokenAudit.is_blacklisted === "0") {
+      contractFunctions += "\n🟥 *Blacklisted*";
+    } else if (tokenAudit.is_whitelisted === "0") {
+      contractFunctions += "\n🟥 *Not Whitelisted*";
+    }
+
+    if (tokenAudit.is_honeypot === "1") {
+      contractFunctions += "\n⚠️ *Is honeypot*";
+    }
+
+    if (tokenAudit.is_proxy === "1") {
+      contractFunctions += "\n⚠️ *Is proxy*";
+    }
+
+    if (tokenAudit.can_take_back_ownership === "1") {
+      contractFunctions += "\n⚠️ *Can take back ownership*";
+    }
+
+    if (tokenAudit.is_mintable === "1") {
+      contractFunctions += "\n🟥 *Mint enabled*";
+    }
+
+    if (tokenAudit.transfer_pausable === "1") {
+      contractFunctions += "\n🟥 *Can pause transfers*";
+    }
+
+    if (contractFunctions) {
+      contractFunctions = `\n*Contract functions*${contractFunctions}\n`;
+    }
 
     if (!(liquidityUsd >= 3000 && liquidityUsd <= 12000 && fdv <= 500000)) {
       log(`Liquidity not in range ${liquidityUsd} ${fdv}`);
@@ -92,7 +128,7 @@ ${isBuyTaxSafe} Buy Tax: ${cleanUpBotMessage(buyTax)}%
 ${isSellTaxSafe} Sell Tax: ${cleanUpBotMessage(sellTax)}%
 ${isLpLocked}
 🎯 Snipers: ${snipers}
-
+${contractFunctions}
 Token Contract:
 \`${token}\`
 
@@ -104,14 +140,18 @@ Social Links: ${socialLinks}
 [📊 DexScreener](${`https://dexscreener.com/ethereum/${token}`}) [⚪ Etherscan](${`https://etherscan.io//token/${token}`})
   `;
 
+    const keyboard = generateKeyboard(token);
+
     const testChannelMsg = teleBot.api.sendMessage(-1002084945881, message, {
       parse_mode: "MarkdownV2",
+      reply_markup: keyboard,
       // @ts-expect-error Param not found
       disable_web_page_preview: true,
     });
 
     const mainChannelMsg = teleBot.api.sendMessage(CHANNEL_ID, message, {
       parse_mode: "MarkdownV2",
+      reply_markup: keyboard,
       // @ts-expect-error Param not found
       disable_web_page_preview: true,
     });
@@ -122,7 +162,7 @@ Social Links: ${socialLinks}
     ]);
 
     if (!hypeNewPairs[token]) {
-      log(`Start tracking ${token} MC`);
+      log(`Sent message for ${token}`);
 
       hypeNewPairs[token] = {
         initialMC: firstPair.fdv,

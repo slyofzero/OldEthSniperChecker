@@ -4,7 +4,7 @@ export const BANANA_ROUTER_ADDRESS = "0xdb5889e35e379ef0498aae126fc2cce1fbd23216
 export const MAESTRO_ROUTER_ADDRESS = "0x4b8c0a0df725750aeb948816b4dffecd32ee9008"; // prettier-ignore
 export const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
 export const ALERT_INTERVAL = 30;
-export const VOLUME_THRESHOLD = 3 * 1e3;
+export const VOLUME_THRESHOLD = 0;
 export const MC_TRACK_THRESHOLD = 24 * 60 * 60;
 export const TOKEN_ABI = [
   {

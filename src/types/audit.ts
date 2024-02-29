@@ -31,6 +31,12 @@ export interface TokenAudit {
   token_symbol: string;
   total_supply: string;
   trust_list: string;
+  is_blacklisted: string;
+  is_whitelisted: string;
+  is_honeypot: string;
+  can_take_back_ownership: string;
+  transfer_pausable: string;
+  is_mintable: string;
 }
 
 interface Dex {

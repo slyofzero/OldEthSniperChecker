@@ -1,4 +1,8 @@
-import { cleanUpBotMessage, hardCleanUpBotMessage } from "@/utils/bot";
+import {
+  cleanUpBotMessage,
+  generateKeyboard,
+  hardCleanUpBotMessage,
+} from "@/utils/bot";
 import { CHANNEL_ID } from "@/utils/env";
 import { teleBot } from "..";
 import { hypeNewPairs } from "@/vars/pairs";
@@ -83,11 +87,14 @@ export async function trackMC() {
 
 [DexScreener](${dexScreenerLink}) \\| [BirdEye](${birdEyeLink})`;
 
+          const keyboard = generateKeyboard(token);
+
           teleBot.api
             .sendMessage(-1002084945881, text, {
               parse_mode: "MarkdownV2",
               // @ts-expect-error Param not found
               disable_web_page_preview: true,
+              reply_markup: keyboard,
               reply_parameters: { message_id: launchMessageTest },
             })
             .then(() => log(`Sent message for ${address}`))
@@ -101,6 +108,7 @@ export async function trackMC() {
               parse_mode: "MarkdownV2",
               // @ts-expect-error Param not found
               disable_web_page_preview: true,
+              reply_markup: keyboard,
               reply_parameters: { message_id: launchMessageMain },
             })
             .then(() => log(`Sent message for ${address}`))
