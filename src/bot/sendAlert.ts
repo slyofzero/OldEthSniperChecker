@@ -62,6 +62,12 @@ export async function sendAlert(token: string) {
     const displayOwnerAddress = `${owner_address.slice(0,3)}\\.\\.\\.${owner_address.slice(-3)}`; // prettier-ignore
     const hypeScore = getRandomInteger();
     const snipers = firstPair.txns.m5.buys + 1;
+    const liquidity = firstPair.liquidity.quote;
+
+    if (!(liquidity >= 3000 && liquidity <= 12000)) {
+      log(`Liquidity not in range ${liquidity}`);
+      return false;
+    }
 
     message = `*Volume Alert*
 
@@ -72,9 +78,7 @@ Hype Score: ${hypeScore}/100
 Age: *${age}*
 Supply: *${totalSupply}*
 💰 Market Cap: *${cleanUpBotMessage(firstPair.fdv.toLocaleString("en"))}*
-🏦 Lp ETH: *${cleanUpBotMessage(
-      firstPair.liquidity.quote.toLocaleString("en")
-    )}*
+🏦 Lp ETH: *${cleanUpBotMessage(liquidity.toLocaleString("en"))}*
 🔥 Burn Token Balance: ${cleanUpBotMessage(burntLp)}%
 👥 Holders: ${tokenAudit.holder_count}
 👥 Top Holders:

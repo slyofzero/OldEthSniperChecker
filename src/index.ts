@@ -71,6 +71,8 @@ log("Bot instance ready");
   });
 
   setInterval(cleanUpTransactions, ALERT_INTERVAL * 1e3);
-  setInterval(getEthPrice, 60 * 1e3);
-  setInterval(trackMC, 10 * 1e3);
+  setInterval(() => {
+    getEthPrice();
+    trackMC();
+  }, 60 * 1e3);
 })();
