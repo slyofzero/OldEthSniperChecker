@@ -14,9 +14,37 @@ import { errorHandler, log } from "@/utils/handlers";
 import { teleBot } from "..";
 import { getRandomInteger } from "@/utils/general";
 import { hypeNewPairs } from "@/vars/pairs";
+import { StoredTransaction } from "@/vars/transactions";
+import { ethPrice } from "@/vars/ethPrice";
 
-export async function sendAlert(token: string, buysCount: number) {
+export async function sendAlert(token: string, storedTxn: StoredTransaction) {
   let message = "";
+
+  const { buys: sniperBuys, totalBuy } = storedTxn;
+  let maestroCount = 0;
+  let maestroBuys: string | number = 0;
+  let unibotCount = 0;
+  let unibotBuys: string | number = 0;
+  let bananaCount = 0;
+  let bananaBuys: string | number = 0;
+  const totalBuyEth = Number(totalBuy / ethPrice).toFixed(2);
+
+  for (const { sniper, amount } of sniperBuys) {
+    if (sniper === "maestro") {
+      maestroCount += 1;
+      maestroBuys += amount;
+    } else if (sniper === "banana") {
+      bananaCount += 1;
+      bananaBuys += amount;
+    } else {
+      unibotCount += 1;
+      unibotBuys += amount;
+    }
+  }
+
+  maestroBuys = Number(maestroBuys / ethPrice).toFixed(2);
+  bananaBuys = Number(bananaBuys / ethPrice).toFixed(2);
+  unibotBuys = Number(unibotBuys / ethPrice).toFixed(2);
 
   try {
     if (!CHANNEL_ID) {
@@ -65,7 +93,7 @@ export async function sendAlert(token: string, buysCount: number) {
     const displayCreatorAddress = `${creator_address.slice(0,3)}\\.\\.\\.${creator_address.slice(-3)}`; // prettier-ignore
     const displayOwnerAddress = `${owner_address.slice(0,3)}\\.\\.\\.${owner_address.slice(-3)}`; // prettier-ignore
     const hypeScore = getRandomInteger();
-    const snipers = firstPair.txns.m5.buys + buysCount;
+    const snipers = bananaCount + maestroCount + unibotCount;
     const liquidity = firstPair.liquidity.quote;
     const liquidityUsd = firstPair.liquidity.usd;
 
@@ -127,7 +155,10 @@ ${isVerified}
 ${isBuyTaxSafe} Buy Tax: ${cleanUpBotMessage(buyTax)}%
 ${isSellTaxSafe} Sell Tax: ${cleanUpBotMessage(sellTax)}%
 ${isLpLocked}
-🎯 Snipers: ${snipers}
+🎯 Snipers: *${snipers}* \\(${cleanUpBotMessage(totalBuyEth)} ETH\\)
+└   BananaGun: ${bananaCount} \\(${cleanUpBotMessage(bananaBuys)} ETH\\)
+      Maestro: ${maestroCount} \\(${cleanUpBotMessage(maestroBuys)} ETH\\)
+      UniBot: ${unibotCount} \\(${cleanUpBotMessage(unibotBuys)} ETH\\)
 ${contractFunctions}
 Token Contract:
 \`${token}\`
@@ -149,17 +180,19 @@ Social Links: ${socialLinks}
       disable_web_page_preview: true,
     });
 
-    const mainChannelMsg = teleBot.api.sendMessage(CHANNEL_ID, message, {
-      parse_mode: "MarkdownV2",
-      reply_markup: keyboard,
-      // @ts-expect-error Param not found
-      disable_web_page_preview: true,
-    });
+    // const mainChannelMsg = teleBot.api.sendMessage(CHANNEL_ID, message, {
+    //   parse_mode: "MarkdownV2",
+    //   reply_markup: keyboard,
+    //   // @ts-expect-error Param not found
+    //   disable_web_page_preview: true,
+    // });
 
-    const [testMsg, mainMsg] = await Promise.all([
-      testChannelMsg,
-      mainChannelMsg,
-    ]);
+    const testMsg = await testChannelMsg;
+
+    // const [testMsg, mainMsg] = await Promise.all([
+    //   testChannelMsg,
+    //   mainChannelMsg,
+    // ]);
 
     if (!hypeNewPairs[token]) {
       log(`Sent message for ${token}`);
@@ -169,7 +202,8 @@ Social Links: ${socialLinks}
         startTime: Math.floor(Date.now() / 1000),
         pastBenchmark: 1,
         launchMessageTest: testMsg.message_id,
-        launchMessageMain: mainMsg.message_id,
+        launchMessageMain: 0,
+        // mainMsg.message_id
       };
     }
   } catch (error) {

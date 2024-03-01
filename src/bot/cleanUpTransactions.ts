@@ -15,10 +15,10 @@ export function cleanUpTransactions() {
   for (const token in transactions) {
     const storedToken = transactions[token];
     const secondsElapsed = currentTime - storedToken.startTime;
-    const totalBuys = storedToken.buys.reduce((prev, curr) => prev + curr);
+    const { totalBuy } = storedToken;
 
-    if (totalBuys > VOLUME_THRESHOLD) {
-      sendAlert(token, storedToken.buys.length).then(() => {
+    if (totalBuy > VOLUME_THRESHOLD) {
+      sendAlert(token, storedToken).then(() => {
         delete transactions[token];
       });
     }
