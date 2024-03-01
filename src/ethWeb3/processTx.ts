@@ -29,7 +29,6 @@ export async function processTransaction(tx: TransactionExtended) {
 
     // Banana
     if (tx.to === BANANA_ROUTER_ADDRESS && methodId === "0x0162e2d0") {
-      log("Matching Banana Router Method ID, proceeding...");
       const params = inputData?.slice(10);
       const fullDataElement = params?.slice(13 * 64, 13 * 64 + 64);
       tokenAddress = "0x" + fullDataElement?.slice(24, 64);

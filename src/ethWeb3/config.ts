@@ -1,11 +1,10 @@
 import Web3, { Web3BaseProvider } from "web3";
 import { ethers } from "ethers";
-import { ALCHEMY_API_KEY } from "@/utils/env";
 import { RegisteredSubscription } from "web3/lib/commonjs/eth.exports";
 import { log } from "@/utils/handlers";
 
-const rpcUrl = `https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`;
-const websocketURL = `wss://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`;
+const rpcUrl = `https://rpc.mevblocker.io`;
+const websocketURL = `wss://ethereum-rpc.publicnode.com`;
 
 export let web3: Web3<RegisteredSubscription> | null = null;
 export let wssProvider: Web3BaseProvider<unknown> | null = null;
