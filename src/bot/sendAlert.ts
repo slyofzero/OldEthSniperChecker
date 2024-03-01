@@ -180,19 +180,17 @@ Social Links: ${socialLinks}
       disable_web_page_preview: true,
     });
 
-    // const mainChannelMsg = teleBot.api.sendMessage(CHANNEL_ID, message, {
-    //   parse_mode: "MarkdownV2",
-    //   reply_markup: keyboard,
-    //   // @ts-expect-error Param not found
-    //   disable_web_page_preview: true,
-    // });
+    const mainChannelMsg = teleBot.api.sendMessage(CHANNEL_ID, message, {
+      parse_mode: "MarkdownV2",
+      reply_markup: keyboard,
+      // @ts-expect-error Param not found
+      disable_web_page_preview: true,
+    });
 
-    const testMsg = await testChannelMsg;
-
-    // const [testMsg, mainMsg] = await Promise.all([
-    //   testChannelMsg,
-    //   mainChannelMsg,
-    // ]);
+    const [testMsg, mainMsg] = await Promise.all([
+      testChannelMsg,
+      mainChannelMsg,
+    ]);
 
     if (!hypeNewPairs[token]) {
       log(`Sent message for ${token}`);
@@ -202,8 +200,7 @@ Social Links: ${socialLinks}
         startTime: Math.floor(Date.now() / 1000),
         pastBenchmark: 1,
         launchMessageTest: testMsg.message_id,
-        launchMessageMain: 0,
-        // mainMsg.message_id
+        launchMessageMain: mainMsg.message_id,
       };
     }
   } catch (error) {
