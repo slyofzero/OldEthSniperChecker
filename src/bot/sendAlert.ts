@@ -134,11 +134,15 @@ export async function sendAlert(token: string, storedTxn: StoredTransaction) {
       return false;
     }
 
-    message = `*Volume Alert*
+    message = `*Snipe Alert*
 
 ${hardCleanUpBotMessage(name)} \\| ${hardCleanUpBotMessage(symbol)}
 
-Hype Score: ${hypeScore}/100
+Token Score: ${hypeScore}/100
+🎯 Snipers: *${snipers}* \\(${cleanUpBotMessage(totalBuyEth)} ETH\\)
+└   BananaGun: ${bananaCount} \\(${cleanUpBotMessage(bananaBuys)} ETH\\)
+       Maestro: ${maestroCount} \\(${cleanUpBotMessage(maestroBuys)} ETH\\)
+       UniBot: ${unibotCount} \\(${cleanUpBotMessage(unibotBuys)} ETH\\)
 
 Age: *${age}*
 Supply: *${totalSupply}*
@@ -155,10 +159,7 @@ ${isVerified}
 ${isBuyTaxSafe} Buy Tax: ${cleanUpBotMessage(buyTax)}%
 ${isSellTaxSafe} Sell Tax: ${cleanUpBotMessage(sellTax)}%
 ${isLpLocked}
-🎯 Snipers: *${snipers}* \\(${cleanUpBotMessage(totalBuyEth)} ETH\\)
-└   BananaGun: ${bananaCount} \\(${cleanUpBotMessage(bananaBuys)} ETH\\)
-      Maestro: ${maestroCount} \\(${cleanUpBotMessage(maestroBuys)} ETH\\)
-      UniBot: ${unibotCount} \\(${cleanUpBotMessage(unibotBuys)} ETH\\)
+
 ${contractFunctions}
 Token Contract:
 \`${token}\`
