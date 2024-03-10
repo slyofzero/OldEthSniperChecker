@@ -72,9 +72,9 @@ export async function trackMC() {
           };
 
           // Links
-          const tokenLink = `https://solscan.io/token/${tokenAddress}`;
-          const dexScreenerLink = `https://dexscreener.com/solana/${address}`;
-          const birdEyeLink = `https://birdeye.so/token/${tokenAddress}?chain=ethereum`;
+          const tokenLink = `https://etherscan.io//token/${token}`;
+          const dexScreenerLink = `https://dexscreener.com/ethereum/${token}`;
+          const dexToolsLink = `https://www.dextools.io/app/en/ether/pair-explorer/${token}`;
 
           const text = `Powered By [Volumizer](https://t.me/Volumizer)
 
@@ -85,7 +85,7 @@ export async function trackMC() {
 💲 MC when found: $${cleanUpBotMessage(formatToInternational(initialMC))}
 💲 MC now: $${cleanUpBotMessage(formatToInternational(currentMC))}
 
-[DexScreener](${dexScreenerLink}) \\| [BirdEye](${birdEyeLink})`;
+[DexScreener](${dexScreenerLink}) \\| [DexTools](${dexToolsLink})`;
 
           const keyboard = generateKeyboard(token);
 
