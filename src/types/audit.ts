@@ -1,67 +1,100 @@
-export interface TokenAuditResponse {
-  id: number;
-  jsonrpc: string;
-  result: Result;
+interface TokenDetails {
+  tokenName: string;
+  tokenSymbol: string;
+  tokenDecimals: number;
+  tokenLogo: string | null;
+  tokenOwner: string;
+  tokenSupply: number;
+  tokenCreatedDate: number;
+  quickiTokenHash: {
+    exact_qHash: string;
+    similar_qHash: string;
+  };
 }
 
-interface Result {
-  [address: string]: TokenAudit;
+interface TokenDynamicDetails {
+  lastUpdatedTimestamp: number;
+  is_Honeypot: boolean;
+  buy_Tax: number | null;
+  sell_Tax: number | null;
+  transfer_Tax: number | null;
+  has_Trading_Cooldown: boolean;
+  post_Cooldown_Tax: number | null;
+  max_Transaction: number | null;
+  max_Transaction_Percent: number | null;
+  max_Wallet: number | null;
+  max_Wallet_Percent: number | null;
+  token_Supply_Burned: number | null;
+  lp_Pair: string | null;
+  lp_Supply: number | null;
+  lp_Burned_Percent: number | null;
+  lp_Locks: string | null;
+  price_Impact: number | null;
+  problem: boolean;
+  extra: string;
+}
+
+interface QuickiAudit {
+  contract_Creator: string;
+  contract_Owner: string;
+  contract_Name: string;
+  contract_Chain: string;
+  contract_Address: string;
+  contract_Renounced: boolean;
+  hidden_Owner: boolean;
+  hidden_Owner_Modifiers: string | null;
+  is_Proxy: boolean;
+  proxy_Implementation: string | null;
+  has_External_Contract_Risk: boolean;
+  external_Contracts: string | null;
+  has_Obfuscated_Address_Risk: boolean;
+  obfuscated_Address_List: string | null;
+  can_Mint: boolean;
+  cant_Mint_Renounced: string | null;
+  can_Burn: boolean;
+  can_Blacklist: boolean;
+  cant_Blacklist_Renounced: boolean;
+  can_MultiBlacklist: boolean;
+  can_Whitelist: boolean;
+  cant_Whitelist_Renounced: string | null;
+  can_Update_Fees: boolean;
+  cant_Update_Fees_Renounced: string | null;
+  can_Update_Max_Wallet: boolean;
+  cant_Update_Max_Wallet_Renounced: string | null;
+  can_Update_Max_Tx: boolean;
+  cant_Update_Max_Tx_Renounced: string | null;
+  can_Pause_Trading: boolean;
+  cant_Pause_Trading_Renounced: boolean;
+  has_Trading_Cooldown: boolean;
+  can_Update_Wallets: boolean;
+  has_Suspicious_Functions: boolean;
+  has_External_Functions: boolean;
+  has_Fee_Warning: boolean | null;
+  has_ModifiedTransfer_Warning: boolean;
+  modified_Transfer_Functions: string | null;
+  suspicious_Functions: string | null;
+  external_Functions: string | null;
+  has_Scams: boolean;
+  matched_Scams: string | null;
+  scam_Functions: string | null;
+  contract_Links: string[];
+  functions: string[];
+  onlyOwner_Functions: string[];
+  multiBlacklistFunctions: string | null;
+  has_General_Vulnerabilities: boolean;
+  general_Vulnerabilities: string | null;
+  fee_Update_Functions: string | null;
 }
 
 export interface TokenAudit {
-  buy_tax: string;
-  cannot_buy: string;
-  cannot_sell_all: string;
-  creator_address: string;
-  creator_balance: string;
-  creator_percent: string;
-  dex: Dex[];
-  holder_count: string;
-  holders: Holder[];
-  honeypot_with_same_creator: string;
-  is_in_dex: string;
-  is_open_source: string;
-  is_proxy: string;
-  lp_holder_count: string;
-  lp_holders: LpHolder[];
-  lp_total_supply: string;
-  owner_address: string;
-  sell_tax: string;
-  token_name: string;
-  token_symbol: string;
-  total_supply: string;
-  trust_list: string;
-  is_blacklisted: string;
-  is_whitelisted: string;
-  is_honeypot: string;
-  can_take_back_ownership: string;
-  transfer_pausable: string;
-  is_mintable: string;
-}
-
-interface Dex {
-  liquidity_type: string;
-  name: string;
-  liquidity: string;
-  pair: string;
-}
-
-interface Holder {
-  address: string;
-  tag: string;
-  is_contract: number;
-  balance: string;
-  percent: string;
-  is_locked: number;
-}
-
-interface LpHolder {
-  address: string;
-  tag: string;
-  value: null;
-  is_contract: number;
-  balance: string;
-  percent: string;
-  NFT_list: null;
-  is_locked: number;
+  tokenDetails: TokenDetails;
+  tokenDynamicDetails: TokenDynamicDetails;
+  isScam: boolean | null;
+  contractVerified: boolean;
+  quickiAudit: QuickiAudit;
+  projectVerified: boolean;
+  projectVerifiDescription: string | null;
+  kycVerifications: string | null;
+  externalAudits: string | null;
+  extraLinks: string | null;
 }

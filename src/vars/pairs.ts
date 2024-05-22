@@ -4,7 +4,6 @@ export interface HypeNewPairs {
     initialMC: number;
     pastBenchmark: number;
     launchMessageMain: number;
-    launchMessageTest: number;
   };
 }
 

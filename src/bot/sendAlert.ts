@@ -1,6 +1,6 @@
 import { apiFetcher } from "@/utils/api";
 import { PairData } from "@/types";
-import { auditToken } from "../ethWeb3/auditToken";
+import { auditToken, getTokenHolders } from "../ethWeb3/tokenInfo";
 import {
   cleanUpBotMessage,
   generateKeyboard,
@@ -16,6 +16,7 @@ import { getRandomInteger } from "@/utils/general";
 import { hypeNewPairs } from "@/vars/pairs";
 import { StoredTransaction } from "@/vars/transactions";
 import { ethPrice } from "@/vars/ethPrice";
+import { isContract } from "@/ethWeb3";
 
 export async function sendAlert(token: string, storedTxn: StoredTransaction) {
   let message = "";
@@ -52,8 +53,9 @@ export async function sendAlert(token: string, storedTxn: StoredTransaction) {
       return "";
     }
 
-    const [tokenAudit, tokenData] = await Promise.all([
+    const [tokenAudit, holdersData, tokenData] = await Promise.all([
       auditToken(token),
+      getTokenHolders(token),
       apiFetcher<PairData>(
         `https://api.dexscreener.com/latest/dex/tokens/${token}`
       ),
@@ -65,33 +67,41 @@ export async function sendAlert(token: string, storedTxn: StoredTransaction) {
     const { baseToken, pairCreatedAt, fdv } = firstPair;
     const { name, symbol } = baseToken;
     const age = cleanUpBotMessage(moment(pairCreatedAt).fromNow());
-    const totalSupply = cleanUpBotMessage(parseFloat(Number(tokenAudit.total_supply).toFixed(2)).toLocaleString("en")) // prettier-ignore
-    const nullAddress = tokenAudit.lp_holders?.find(({ address }) => address === NULL_ADDRESS); // prettier-ignore
-    const burntLp = parseFloat((Number(nullAddress?.percent || 0) * 100).toFixed(2)); // prettier-ignore
-    const isLpLocked =
-      burntLp === 100 ? "🟩 LP locked: YES" : "🟥 LP locked: NO";
-    const holders = tokenAudit.holders
-      .map(({ is_contract, percent, address }) => {
-        const holding = cleanUpBotMessage((Number(percent) * 100).toFixed(1)); // prettier-ignore
-        const url = `https://etherscan.io/address/${address}`;
-        const text = `[${is_contract ? "📜" : "👨"} ${holding}%](${url})`;
-        return text;
-      })
-      .slice(0, 5)
-      .join(" \\| ");
+    const { tokenSupply: totalSupply, tokenDecimals: decimals } =
+      tokenAudit.tokenDetails;
+    const burntLp = tokenAudit.tokenDynamicDetails.lp_Burned_Percent || 0;
+    const isLpLocked = tokenAudit.tokenDynamicDetails.lp_Locks
+      ? "🟩 LP locked: YES"
+      : "🟥 LP locked: NO";
 
-    const { creator_address, owner_address, is_open_source } = tokenAudit;
-    const buyTax = Number((Number(tokenAudit.buy_tax) * 100).toFixed(2));
-    const sellTax = Number((Number(tokenAudit.sell_tax) * 100).toFixed(2));
-    const isNullOwner = owner_address === NULL_ADDRESS ? "🟩" : "🟥";
-    const isVerified = is_open_source
-      ? "🟩 Contract Verified"
-      : "🟥 Contract Unverified";
+    let holders: string | string[] = [];
+    for (const {
+      accountAddress,
+      tokenBalance: hexValue,
+    } of holdersData.topHolders.slice(0, 5)) {
+      const tokenBalance = Number(BigInt(hexValue) / 10n ** BigInt(decimals));
+      const holding = cleanUpBotMessage(((tokenBalance / totalSupply) * 100).toFixed(1)); // prettier-ignore
+      const url = `https://etherscan.io/address/${accountAddress}`;
+      const is_contract = await isContract(accountAddress);
+      const text = `[${is_contract ? "📜" : "👨"} ${holding}%](${url})`;
+      holders.push(text);
+    }
+    holders = holders.join(" \\| ");
+
+    const { contract_Creator, contract_Owner, contract_Renounced } =
+      tokenAudit.quickiAudit;
+    const { buy_Tax, sell_Tax } = tokenAudit.tokenDynamicDetails;
+    const buyTax = Number((Number(buy_Tax || 0) * 100).toFixed(2));
+    const sellTax = Number((Number(sell_Tax || 0) * 100).toFixed(2));
+    const isNullOwner = contract_Owner === NULL_ADDRESS ? "🟩" : "🟥";
+    const isVerified = contract_Renounced
+      ? "🟩 Ownership Renounced"
+      : "🟥 Ownership Not Renounced";
     const isBuyTaxSafe = buyTax <= 15 ? "🟩" : buyTax <= 30 ? "🟨" : "🟥";
     const isSellTaxSafe = sellTax <= 15 ? "🟩" : sellTax <= 30 ? "🟨" : "🟥";
     const socialLinks = await extractSocialLinks(token);
-    const displayCreatorAddress = `${creator_address.slice(0,3)}\\.\\.\\.${creator_address.slice(-3)}`; // prettier-ignore
-    const displayOwnerAddress = `${owner_address.slice(0,3)}\\.\\.\\.${owner_address.slice(-3)}`; // prettier-ignore
+    const displayCreatorAddress = `${contract_Creator.slice(0,3)}\\.\\.\\.${contract_Creator.slice(-3)}`; // prettier-ignore
+    const displayOwnerAddress = `${contract_Owner.slice(0,3)}\\.\\.\\.${contract_Owner.slice(-3)}`; // prettier-ignore
     const hypeScore = getRandomInteger();
     const snipers = bananaCount + maestroCount + unibotCount;
     const liquidity = firstPair.liquidity.quote;
@@ -99,34 +109,32 @@ export async function sendAlert(token: string, storedTxn: StoredTransaction) {
 
     // Audit
     let contractFunctions = "";
-    if (tokenAudit.is_blacklisted === "0") {
-      contractFunctions += "\n🟥 *Blacklisted*";
-    } else if (tokenAudit.is_whitelisted === "0") {
-      contractFunctions += "\n🟥 *Not Whitelisted*";
+    if (tokenAudit.quickiAudit.can_Blacklist) {
+      contractFunctions += "\n🟥 *Can Blacklist*";
     }
 
-    if (tokenAudit.is_honeypot === "1") {
+    if (tokenAudit.quickiAudit.can_Whitelist) {
+      contractFunctions += "\n🟥 *Can Whitelist*";
+    }
+
+    if (tokenAudit.tokenDynamicDetails.is_Honeypot) {
       contractFunctions += "\n⚠️ *Is honeypot*";
     }
 
-    if (tokenAudit.is_proxy === "1") {
+    if (tokenAudit.quickiAudit.is_Proxy) {
       contractFunctions += "\n⚠️ *Is proxy*";
     }
 
-    if (tokenAudit.can_take_back_ownership === "1") {
-      contractFunctions += "\n⚠️ *Can take back ownership*";
-    }
-
-    if (tokenAudit.is_mintable === "1") {
+    if (tokenAudit.quickiAudit.can_Mint) {
       contractFunctions += "\n🟥 *Mint enabled*";
     }
 
-    if (tokenAudit.transfer_pausable === "1") {
-      contractFunctions += "\n🟥 *Can pause transfers*";
+    if (tokenAudit.quickiAudit.can_Pause_Trading) {
+      contractFunctions += "\n🟥 *Can pause trading*";
     }
 
     if (contractFunctions) {
-      contractFunctions = `\n*Contract functions*${contractFunctions}\n`;
+      contractFunctions = `*Contract functions*${contractFunctions}\n`;
     }
 
     if (!(liquidityUsd >= 3000 && liquidityUsd <= 12000 && fdv <= 500000)) {
@@ -145,27 +153,26 @@ Token Score: ${hypeScore}/100
        UniBot: ${unibotCount} \\(${cleanUpBotMessage(unibotBuys)} ETH\\)
 
 Age: *${age}*
-Supply: *${totalSupply}*
-💰 Market Cap: *${cleanUpBotMessage(firstPair.fdv.toLocaleString("en"))}*
+Supply: *${parseFloat(totalSupply.toFixed(0)).toLocaleString("en")}*
+
+💰 Market Cap: $*${cleanUpBotMessage(fdv.toLocaleString("en"))}*
 🏦 Lp ETH: *${cleanUpBotMessage(liquidity.toLocaleString("en"))}*
 🔥 Burn Token Balance: ${cleanUpBotMessage(burntLp)}%
-👥 Holders: ${tokenAudit.holder_count}
+👥 Holders: ${holdersData.holdersCount}
 👥 Top Holders:
 ${holders}
 
-Deployer: [${displayCreatorAddress}](https://etherscan.io/address/${creator_address})
-${isNullOwner} Owner: [${displayOwnerAddress}](https://etherscan.io/address/${owner_address})
+Deployer: [${displayCreatorAddress}](https://etherscan.io/address/${contract_Creator})
+${isNullOwner} Owner: [${displayOwnerAddress}](https://etherscan.io/address/${contract_Owner})
 ${isVerified}
 ${isBuyTaxSafe} Buy Tax: ${cleanUpBotMessage(buyTax)}%
 ${isSellTaxSafe} Sell Tax: ${cleanUpBotMessage(sellTax)}%
 ${isLpLocked}
-
 ${contractFunctions}
 Token Contract:
 \`${token}\`
 
 Security: [OttoSimBot](${`https://t.me/OttoSimBot?start=${token}`}) \\| [TokenSniffer](${`https://tokensniffer.com/token/eth/${token}`})
-
 Social Links: ${socialLinks}
 
 [📊 DexTools](${`https://www.dextools.io/app/en/ether/pair-explorer/${token}`}) [📊 DexSpy](${`https://dexspy.io/eth/token/${token}`})
@@ -174,24 +181,12 @@ Social Links: ${socialLinks}
 
     const keyboard = generateKeyboard(token);
 
-    const testChannelMsg = teleBot.api.sendMessage(-1002084945881, message, {
+    const mainChannelMsg = await teleBot.api.sendMessage(CHANNEL_ID, message, {
       parse_mode: "MarkdownV2",
       reply_markup: keyboard,
       // @ts-expect-error Param not found
       disable_web_page_preview: true,
     });
-
-    const mainChannelMsg = teleBot.api.sendMessage(CHANNEL_ID, message, {
-      parse_mode: "MarkdownV2",
-      reply_markup: keyboard,
-      // @ts-expect-error Param not found
-      disable_web_page_preview: true,
-    });
-
-    const [testMsg, mainMsg] = await Promise.all([
-      testChannelMsg,
-      mainChannelMsg,
-    ]);
 
     if (!hypeNewPairs[token]) {
       log(`Sent message for ${token}`);
@@ -200,12 +195,11 @@ Social Links: ${socialLinks}
         initialMC: firstPair.fdv,
         startTime: Math.floor(Date.now() / 1000),
         pastBenchmark: 1,
-        launchMessageTest: testMsg.message_id,
-        launchMessageMain: mainMsg.message_id,
+        launchMessageMain: mainChannelMsg.message_id,
       };
     }
   } catch (error) {
-    log(message);
-    errorHandler(error);
+    log(message, `Error for token ${token}`);
+    errorHandler(error, true);
   }
 }

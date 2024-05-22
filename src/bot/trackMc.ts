@@ -39,13 +39,8 @@ export async function trackMC() {
       } = firstPair;
       const { address: tokenAddress, symbol } = baseToken;
 
-      const {
-        initialMC,
-        pastBenchmark,
-        launchMessageMain,
-        launchMessageTest,
-        ...rest
-      } = hypeNewPairs[token];
+      const { initialMC, pastBenchmark, launchMessageMain, ...rest } =
+        hypeNewPairs[token];
       const currentMC = Number(marketCap);
 
       if (initialMC === 0 && currentMC > 0) {
@@ -54,7 +49,6 @@ export async function trackMC() {
           initialMC: currentMC,
           pastBenchmark: 1,
           launchMessageMain,
-          launchMessageTest,
           ...rest,
         };
       } else {
@@ -67,7 +61,6 @@ export async function trackMC() {
             initialMC,
             pastBenchmark: increase,
             launchMessageMain,
-            launchMessageTest,
             ...rest,
           };
 
@@ -88,20 +81,6 @@ export async function trackMC() {
 [DexScreener](${dexScreenerLink}) \\| [DexTools](${dexToolsLink})`;
 
           const keyboard = generateKeyboard(token);
-
-          teleBot.api
-            .sendMessage(-1002084945881, text, {
-              parse_mode: "MarkdownV2",
-              // @ts-expect-error Param not found
-              disable_web_page_preview: true,
-              reply_markup: keyboard,
-              reply_parameters: { message_id: launchMessageTest },
-            })
-            .then(() => log(`Sent message for ${address}`))
-            .catch((e) => {
-              log(text);
-              errorHandler(e);
-            });
 
           teleBot.api
             .sendMessage(CHANNEL_ID, text, {
