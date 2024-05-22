@@ -138,10 +138,10 @@ export async function sendAlert(token: string, storedTxn: StoredTransaction) {
       contractFunctions = `*Contract functions*${contractFunctions}\n`;
     }
 
-    if (!(liquidityUsd >= 3000 && liquidityUsd <= 12000 && fdv <= 500000)) {
-      log(`Liquidity not in range ${liquidityUsd} ${fdv}`);
-      return false;
-    }
+    // if (!(liquidityUsd >= 3000 && liquidityUsd <= 12000 && fdv <= 500000)) {
+    //   log(`Liquidity not in range ${liquidityUsd} ${fdv}`);
+    //   return false;
+    // }
 
     message = `*Snipe Alert*
 
