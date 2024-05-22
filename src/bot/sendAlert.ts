@@ -90,10 +90,11 @@ export async function sendAlert(token: string, storedTxn: StoredTransaction) {
 
     const { contract_Creator, contract_Owner, contract_Renounced } =
       tokenAudit.quickiAudit;
+    const contractOwner = contract_Owner || NULL_ADDRESS;
     const { buy_Tax, sell_Tax } = tokenAudit.tokenDynamicDetails;
     const buyTax = Number((Number(buy_Tax || 0) * 100).toFixed(2));
     const sellTax = Number((Number(sell_Tax || 0) * 100).toFixed(2));
-    const isNullOwner = contract_Owner === NULL_ADDRESS ? "🟩" : "🟥";
+    const isNullOwner = contractOwner ? "🟩" : "🟥";
     const isVerified = contract_Renounced
       ? "🟩 Ownership Renounced"
       : "🟥 Ownership Not Renounced";
