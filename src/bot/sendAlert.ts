@@ -142,9 +142,7 @@ export async function sendAlert(token: string, storedTxn: StoredTransaction) {
     //   return false;
     // }
 
-    message = `🚨 *Snipe Alert: ${hardCleanUpBotMessage(
-      name
-    )} \\(${hardCleanUpBotMessage(symbol)}\\)* 🚨
+    message = `*TOOLS AI | FOMO ALERT (ETH)*
 
 ${hardCleanUpBotMessage(name)} \\| ${hardCleanUpBotMessage(symbol)}
 

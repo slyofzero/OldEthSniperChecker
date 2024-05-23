@@ -69,16 +69,18 @@ export async function trackMC() {
           const dexScreenerLink = `https://dexscreener.com/ethereum/${token}`;
           const dexToolsLink = `https://www.dextools.io/app/en/ether/pair-explorer/${token}`;
 
-          const text = `Powered By [Volumizer](https://t.me/Volumizer)
+          const text = `*[TOOLS AI | FOMO ALERT](https://t.me/ToolsAiFomoAlerts_ETH)*
 
-[${hardCleanUpBotMessage(symbol)}](${tokenLink}) jumped by ${cleanUpBotMessage(
+[${hardCleanUpBotMessage(symbol)}](${tokenLink}) soared by ${cleanUpBotMessage(
             exactIncrease
           )}x\\!\\!\\!
 
-💲 MC when found: $${cleanUpBotMessage(formatToInternational(initialMC))}
-💲 MC now: $${cleanUpBotMessage(formatToInternational(currentMC))}
+\\- MC when found: $${cleanUpBotMessage(formatToInternational(initialMC))}
+\\- MC now: $${cleanUpBotMessage(formatToInternational(currentMC))}
 
-[DexScreener](${dexScreenerLink}) \\| [DexTools](${dexToolsLink})`;
+Track with:
+\\- [DexScreener](${dexScreenerLink}) 
+\\- [DexTools](${dexToolsLink})`;
 
           const keyboard = generateKeyboard(token);
 
