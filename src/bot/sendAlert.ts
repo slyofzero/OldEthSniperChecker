@@ -7,7 +7,6 @@ import {
   hardCleanUpBotMessage,
 } from "@/utils/bot";
 import moment from "moment";
-import { NULL_ADDRESS } from "@/utils/constants";
 import { extractSocialLinks } from "../ethWeb3/extractSocialLinks";
 import { CHANNEL_ID } from "@/utils/env";
 import { errorHandler, log } from "@/utils/handlers";
@@ -75,26 +74,26 @@ export async function sendAlert(token: string, storedTxn: StoredTransaction) {
       : "🟥 LP locked: NO";
 
     let holders: string | string[] = [];
-    for (const {
-      accountAddress,
-      tokenBalance: hexValue,
-    } of holdersData.topHolders.slice(0, 5)) {
+    for (const [index, holderData] of holdersData.topHolders
+      .slice(0, 5)
+      .entries()) {
+      const { accountAddress, tokenBalance: hexValue } = holderData;
       const tokenBalance = Number(BigInt(hexValue) / 10n ** BigInt(decimals));
       const holding = cleanUpBotMessage(((tokenBalance / totalSupply) * 100).toFixed(1)); // prettier-ignore
       const url = `https://etherscan.io/address/${accountAddress}`;
       const is_contract = await isContract(accountAddress);
-      const text = `[${is_contract ? "📜" : "👨"} ${holding}%](${url})`;
+      const text = `${index + 1}\\. [${
+        is_contract ? "📜" : "👨"
+      } ${holding}%](${url})`;
       holders.push(text);
     }
-    holders = holders.join(" \\| ");
+    holders = holders.join("\n");
 
     const { contract_Creator, contract_Owner, contract_Renounced } =
       tokenAudit.quickiAudit;
-    const contractOwner = contract_Owner || NULL_ADDRESS;
     const { buy_Tax, sell_Tax } = tokenAudit.tokenDynamicDetails;
     const buyTax = Number((Number(buy_Tax || 0) * 100).toFixed(2));
     const sellTax = Number((Number(sell_Tax || 0) * 100).toFixed(2));
-    const isNullOwner = contractOwner ? "🟩" : "🟥";
     const isVerified = contract_Renounced
       ? "🟩 Ownership Renounced"
       : "🟥 Ownership Not Renounced";
@@ -111,31 +110,31 @@ export async function sendAlert(token: string, storedTxn: StoredTransaction) {
     // Audit
     let contractFunctions = "";
     if (tokenAudit.quickiAudit.can_Blacklist) {
-      contractFunctions += "\n🟥 *Can Blacklist*";
+      contractFunctions += "\n\\-🟥 *Can Blacklist*";
     }
 
     if (tokenAudit.quickiAudit.can_Whitelist) {
-      contractFunctions += "\n🟥 *Can Whitelist*";
+      contractFunctions += "\n\\-🟥 *Can Whitelist*";
     }
 
     if (tokenAudit.tokenDynamicDetails.is_Honeypot) {
-      contractFunctions += "\n⚠️ *Is honeypot*";
+      contractFunctions += "\n\\-⚠️ *Is honeypot*";
     }
 
     if (tokenAudit.quickiAudit.is_Proxy) {
-      contractFunctions += "\n⚠️ *Is proxy*";
+      contractFunctions += "\n\\-⚠️ *Is proxy*";
     }
 
     if (tokenAudit.quickiAudit.can_Mint) {
-      contractFunctions += "\n🟥 *Mint enabled*";
+      contractFunctions += "\n\\-🟥 *Mint enabled*";
     }
 
     if (tokenAudit.quickiAudit.can_Pause_Trading) {
-      contractFunctions += "\n🟥 *Can pause trading*";
+      contractFunctions += "\n\\-🟥 *Can pause trading*";
     }
 
     if (contractFunctions) {
-      contractFunctions = `*Contract functions*${contractFunctions}\n`;
+      contractFunctions = `\n📄 Contract Information${contractFunctions}\n`;
     }
 
     // if (!(liquidityUsd >= 3000 && liquidityUsd <= 12000 && fdv <= 500000)) {
@@ -143,41 +142,53 @@ export async function sendAlert(token: string, storedTxn: StoredTransaction) {
     //   return false;
     // }
 
-    message = `*Snipe Alert*
+    message = `🚨 *Snipe Alert: ${hardCleanUpBotMessage(
+      name
+    )} \\(${hardCleanUpBotMessage(symbol)}\\)* 🚨
 
 ${hardCleanUpBotMessage(name)} \\| ${hardCleanUpBotMessage(symbol)}
 
-Token Score: ${hypeScore}/100
-🎯 Snipers: *${snipers}* \\(${cleanUpBotMessage(totalBuyEth)} ETH\\)
-└   BananaGun: ${bananaCount} \\(${cleanUpBotMessage(bananaBuys)} ETH\\)
-       Maestro: ${maestroCount} \\(${cleanUpBotMessage(maestroBuys)} ETH\\)
-       UniBot: ${unibotCount} \\(${cleanUpBotMessage(unibotBuys)} ETH\\)
+📊 Token Overview
 
-Age: *${age}*
-Supply: *${parseFloat(totalSupply.toFixed(0)).toLocaleString("en")}*
+\\-Token Score: ${hypeScore}/100
+\\-⏰ Age: ${age}
+\\-📦 TotalSupply: ${parseFloat(totalSupply.toFixed(0)).toLocaleString("en")}
+\\-💰 Market Cap: $*${cleanUpBotMessage(fdv.toLocaleString("en"))}*
+\\-🏦 Lp ETH: *${cleanUpBotMessage(liquidity.toLocaleString("en"))}*
+\\-🔥 Burn Token Balance: ${cleanUpBotMessage(burntLp)}%
+\\-👥 Holders: ${holdersData.holdersCount}
 
-💰 Market Cap: $*${cleanUpBotMessage(fdv.toLocaleString("en"))}*
-🏦 Lp ETH: *${cleanUpBotMessage(liquidity.toLocaleString("en"))}*
-🔥 Burn Token Balance: ${cleanUpBotMessage(burntLp)}%
-👥 Holders: ${holdersData.holdersCount}
-👥 Top Holders:
+👑 Top Holders Distribution:
 ${holders}
 
-Deployer: [${displayCreatorAddress}](https://etherscan.io/address/${contract_Creator})
-${isNullOwner} Owner: [${displayOwnerAddress}](https://etherscan.io/address/${contract_Owner})
-${isVerified}
-${isBuyTaxSafe} Buy Tax: ${cleanUpBotMessage(buyTax)}%
-${isSellTaxSafe} Sell Tax: ${cleanUpBotMessage(sellTax)}%
-${isLpLocked}
+🎯 Sniper Activity
+\\- Total snipers: *${snipers}* \\(${cleanUpBotMessage(totalBuyEth)} ETH\\)
+ \\- BananaGun: ${bananaCount} \\(${cleanUpBotMessage(bananaBuys)} ETH\\)
+ \\- Maestro: ${maestroCount} \\(${cleanUpBotMessage(maestroBuys)} ETH\\)
+ \\- UniBot: ${unibotCount} \\(${cleanUpBotMessage(unibotBuys)} ETH\\)
+
+🔒 Ownership and Security
+\\- 🛠️ Deployer Address: [${displayCreatorAddress}](https://etherscan.io/address/${contract_Creator})
+\\- 👤 Owner Address [${displayOwnerAddress}](https://etherscan.io/address/${contract_Owner})
+\\- ${isVerified}
+\\- ${isBuyTaxSafe} Buy Tax: ${cleanUpBotMessage(buyTax)}%
+\\- ${isSellTaxSafe} Sell Tax: ${cleanUpBotMessage(sellTax)}%
+\\- ${isLpLocked}
 ${contractFunctions}
 Token Contract:
 \`${token}\`
 
-Security: [OttoSimBot](${`https://t.me/OttoSimBot?start=${token}`}) \\| [TokenSniffer](${`https://tokensniffer.com/token/eth/${token}`})
-Social Links: ${socialLinks}
+🔍 Security Checks
+\\- [OttoSimBot](${`https://t.me/OttoSimBot?start=${token}`}) 
+\\- [TokenSniffer](${`https://tokensniffer.com/token/eth/${token}`})
 
-[📊 DexTools](${`https://www.dextools.io/app/en/ether/pair-explorer/${token}`}) [📊 DexSpy](${`https://dexspy.io/eth/token/${token}`})
-[📊 DexScreener](${`https://dexscreener.com/ethereum/${token}`}) [⚪ Etherscan](${`https://etherscan.io//token/${token}`})
+🔗 Social Media: ${socialLinks}
+
+📈 Monitoring Tools
+\\-[DexTools](${`https://www.dextools.io/app/en/ether/pair-explorer/${token}`}) 
+\\-[DexSpy](${`https://dexspy.io/eth/token/${token}`})
+\\-[DexScreener](${`https://dexscreener.com/ethereum/${token}`}) 
+\\-[Etherscan](${`https://etherscan.io//token/${token}`})
   `;
 
     const keyboard = generateKeyboard(token);
