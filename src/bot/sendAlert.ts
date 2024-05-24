@@ -142,7 +142,7 @@ export async function sendAlert(token: string, storedTxn: StoredTransaction) {
     //   return false;
     // }
 
-    message = `*TOOLS AI \\| FOMO ALERT (ETH)*
+    message = `*TOOLS AI \\| FOMO ALERT \\(ETH\\)*
 
 ${hardCleanUpBotMessage(name)} \\| ${hardCleanUpBotMessage(symbol)}
 
