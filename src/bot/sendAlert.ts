@@ -137,10 +137,10 @@ export async function sendAlert(token: string, storedTxn: StoredTransaction) {
       contractFunctions = `\n📄 Contract Information${contractFunctions}\n`;
     }
 
-    if (!(liquidity >= 1 && fdv > 30_000 && fdv < 200_000)) {
-      log(`Liquidity not in range ${liquidityUsd} ${fdv}`);
-      return false;
-    }
+    // if (!(liquidity >= 1 && fdv > 30_000 && fdv < 200_000)) {
+    //   log(`Liquidity not in range ${liquidityUsd} ${fdv}`);
+    //   return false;
+    // }
 
     message = `*TOOLS AI \\| FOMO ALERT (ETH)*
 
