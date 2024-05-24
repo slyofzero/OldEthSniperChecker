@@ -69,7 +69,7 @@ export async function trackMC() {
           const dexScreenerLink = `https://dexscreener.com/ethereum/${token}`;
           const dexToolsLink = `https://www.dextools.io/app/en/ether/pair-explorer/${token}`;
 
-          const text = `*[TOOLS AI | FOMO ALERT](https://t.me/ToolsAiFomoAlerts_ETH)*
+          const text = `*[TOOLS AI \\| FOMO ALERT](https://t.me/ToolsAiFomoAlerts_ETH)*
 
 [${hardCleanUpBotMessage(symbol)}](${tokenLink}) soared by ${cleanUpBotMessage(
             exactIncrease
